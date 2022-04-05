@@ -3,15 +3,12 @@ defmodule Duper.Application do
 
   use Application
 
-  alias Duper.{Storage, PathFinder, Gatherer, Hasher}
+  alias Duper.Hasher.Gatherer
 
   @impl true
   def start(_type, _args) do
     children = [
-      Storage,
-      {PathFinder, "C:\\Users\\tyyag\\Downloads"},
-      Hasher.Supervisor,
-      {Gatherer, 10}
+      {Gatherer, System.schedulers_online() * 2}
     ]
 
     opts = [strategy: :one_for_one, name: Duper.Supervisor]

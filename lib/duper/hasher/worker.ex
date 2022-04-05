@@ -1,29 +1,17 @@
 defmodule Duper.Hasher.Worker do
-  use GenServer
+  @type successful :: {:ok, {String.t(), String.t()}}
+  @type failed :: {:error, Exception.t()}
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil)
-  end
+  @spec run(String.t()) :: successful() | failed()
+  def run(path) do
+    IO.inspect(path, label: "Hashing")
 
-  @impl GenServer
-  def init(nil) do
-    send(self(), :work)
-    {:ok, nil}
-  end
-
-  @impl GenServer
-  def handle_info(:work, nil) do
-    case Duper.PathFinder.next() do
-      nil ->
-        IO.inspect(self(), label: "Worker done")
-        Duper.Gatherer.done()
-        {:stop, :normal, nil}
-
-      path ->
-        IO.inspect({self(), path}, label: "Worker hashing")
-        Duper.Storage.add(path, hash(path))
-        send(self(), :work)
-        {:noreply, nil}
+    try do
+      {:ok, {path, hash(path)}}
+    rescue
+      e ->
+        IO.inspect(path, label: "Hash failed")
+        {:error, e}
     end
   end
 
