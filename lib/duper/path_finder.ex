@@ -6,7 +6,7 @@ defmodule Duper.PathFinder do
   end
 
   def next() do
-    GenServer.call(__MODULE__, :next)
+    GenServer.call(__MODULE__, :next, 10_000)
   end
 
   @impl GenServer
@@ -17,7 +17,10 @@ defmodule Duper.PathFinder do
   @impl GenServer
   def handle_call(:next, _caller, state) do
     path =
-      case DirWalker.next(state) do
+      state
+      |> DirWalker.next()
+      |> IO.inspect()
+      |> case do
         [path] -> path
         other -> other
       end
